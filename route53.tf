@@ -4,20 +4,43 @@ resource "aws_route53_record" "route" {
   type    = "A"
 
   alias {
-    name                   = aws_alb.nats_seed_route_load_balancer.dns_name
-    zone_id                = aws_alb.nats_seed_route_load_balancer.zone_id
+    name                   = aws_alb.nats_seed_route_lb.dns_name
+    zone_id                = aws_alb.nats_seed_route_lb.zone_id
     evaluate_target_health = true
   }
 }
 
-resource "aws_route53_record" "client" {
+resource "aws_route53_record" "client1" {
   zone_id = "Z03426271WYK1UIK7PFGW"
-  name    = "client.314d.link"
+  name    = "client1.314d.link"
   type    = "A"
 
   alias {
-    name                   = aws_alb.nats_server_client_load_balancer.dns_name
-    zone_id                = aws_alb.nats_server_client_load_balancer.zone_id
+    name                   = aws_alb.nats_server1_client_lb.dns_name
+    zone_id                = aws_alb.nats_server1_client_lb.zone_id
+    evaluate_target_health = true
+  }
+}
+resource "aws_route53_record" "client2" {
+  zone_id = "Z03426271WYK1UIK7PFGW"
+  name    = "client2.314d.link"
+  type    = "A"
+
+  alias {
+    name                   = aws_alb.nats_server2_client_lb.dns_name
+    zone_id                = aws_alb.nats_server2_client_lb.zone_id
+    evaluate_target_health = true
+  }
+}
+
+resource "aws_route53_record" "client-seed" {
+  zone_id = "Z03426271WYK1UIK7PFGW"
+  name    = "client-seed.314d.link"
+  type    = "A"
+
+  alias {
+    name                   = aws_alb.nats_seed_client_lb.dns_name
+    zone_id                = aws_alb.nats_seed_client_lb.zone_id
     evaluate_target_health = true
   }
 }
@@ -28,8 +51,8 @@ resource "aws_route53_record" "monitor" {
   type    = "A"
 
   alias {
-    name                   = aws_alb.nats_seed_monitor_load_balancer.dns_name
-    zone_id                = aws_alb.nats_seed_monitor_load_balancer.zone_id
+    name                   = aws_alb.nats_seed_monitor_lb.dns_name
+    zone_id                = aws_alb.nats_seed_monitor_lb.zone_id
     evaluate_target_health = true
   }
 }

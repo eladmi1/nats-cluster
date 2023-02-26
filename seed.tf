@@ -29,54 +29,9 @@ resource "aws_ecs_task_definition" "nats_seed_task" {
   execution_role_arn       = aws_iam_role.ecsTaskExecutionRole.arn
 }
 
-resource "aws_security_group" "nats_seed_route_security_group" {
-  ingress {
-    from_port   = "${var.route_port}"
-    to_port     = "${var.route_port}"
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
 
-resource "aws_security_group" "nats_seed_client_security_group" {
-  ingress {
-    from_port   = "${var.client_port}"
-    to_port     = "${var.client_port}"
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_security_group" "nats_seed_monitor_security_group" {
-  ingress {
-    from_port   = "${var.http_monitoring_port}"
-    to_port     = "${var.http_monitoring_port}"
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-
-resource "aws_alb" "nats_seed_route_load_balancer" {
-  name               = "nats-seed-route-load-balancer"
+resource "aws_alb" "nats_seed_route_lb" {
+  name               = "nats-seed-route-lb"
   load_balancer_type = "network"
   subnets = [
     "${aws_default_subnet.default_subnet_a.id}",
@@ -84,9 +39,9 @@ resource "aws_alb" "nats_seed_route_load_balancer" {
     "${aws_default_subnet.default_subnet_c.id}"
   ]
 }
-/*
-resource "aws_alb" "nats_seed_client_load_balancer" {
-  name               = "nats-seed-client-load-balancer"
+
+resource "aws_alb" "nats_seed_client_lb" {
+  name               = "nats-seed-client-lb"
   load_balancer_type = "network"
   subnets = [
     "${aws_default_subnet.default_subnet_a.id}",
@@ -94,16 +49,16 @@ resource "aws_alb" "nats_seed_client_load_balancer" {
     "${aws_default_subnet.default_subnet_c.id}"
   ]
 }
-*/
-resource "aws_alb" "nats_seed_monitor_load_balancer" {
-  name               = "nats-seed-monitor-load-balancer"
+
+resource "aws_alb" "nats_seed_monitor_lb" {
+  name               = "nats-seed-monitor-lb"
   load_balancer_type = "application"
   subnets = [
     "${aws_default_subnet.default_subnet_a.id}",
     "${aws_default_subnet.default_subnet_b.id}",
     "${aws_default_subnet.default_subnet_c.id}"
   ]
-  security_groups = ["${aws_security_group.nats_seed_monitor_security_group.id}"]
+  security_groups = ["${aws_security_group.nats_monitor_security_group.id}"]
 }
 
 resource "aws_lb_target_group" "nats_seed_route_target_group" {
@@ -113,7 +68,7 @@ resource "aws_lb_target_group" "nats_seed_route_target_group" {
   target_type = "ip"
   vpc_id      = "${aws_default_vpc.default_vpc.id}" 
 }
-/*
+
 resource "aws_lb_target_group" "nats_seed_client_target_group" {
   name        = "nats-seed-client-target-group"
   port        = "${var.client_port}"
@@ -121,7 +76,7 @@ resource "aws_lb_target_group" "nats_seed_client_target_group" {
   target_type = "ip"
   vpc_id      = "${aws_default_vpc.default_vpc.id}" 
 }
-*/
+
 resource "aws_lb_target_group" "nats_seed_monitor_target_group" {
   name        = "nats-seed-monitor-target-group"
   port        = "${var.http_monitoring_port}"
@@ -135,7 +90,7 @@ resource "aws_lb_target_group" "nats_seed_monitor_target_group" {
 }
 
 resource "aws_lb_listener" "nats_seed_route_listener" {
-  load_balancer_arn = "${aws_alb.nats_seed_route_load_balancer.arn}" 
+  load_balancer_arn = "${aws_alb.nats_seed_route_lb.arn}" 
   port              = "${var.route_port}"
   protocol          = "TCP"
   default_action {
@@ -143,9 +98,9 @@ resource "aws_lb_listener" "nats_seed_route_listener" {
     target_group_arn = "${aws_lb_target_group.nats_seed_route_target_group.arn}" 
   }
 }
-/*
+
 resource "aws_lb_listener" "nats_seed_client_listener" {
-  load_balancer_arn = "${aws_alb.nats_seed_client_load_balancer.arn}" 
+  load_balancer_arn = "${aws_alb.nats_seed_client_lb.arn}" 
   port              = "${var.client_port}"
   protocol          = "TCP"
   default_action {
@@ -153,9 +108,9 @@ resource "aws_lb_listener" "nats_seed_client_listener" {
     target_group_arn = "${aws_lb_target_group.nats_seed_client_target_group.arn}" 
   }
 }
-*/
+
 resource "aws_lb_listener" "nats_seed_monitor_listener" {
-  load_balancer_arn = "${aws_alb.nats_seed_monitor_load_balancer.arn}" 
+  load_balancer_arn = "${aws_alb.nats_seed_monitor_lb.arn}" 
   port              = "${var.http_monitoring_port}"
   protocol          = "HTTP"
   default_action {
