@@ -15,13 +15,7 @@ resource "aws_ecs_service" "nats_seed_service" {
     container_name   = "nats_seed"
     container_port   = "${var.client_port}"
   }
- /*
-load_balancer {
-    target_group_arn = "${aws_lb_target_group.nats_server1_client_target_group.arn}" 
-    container_name   = "nats_seed"
-    container_port   = "${var.client_port}"
-  }
-*/
+  
  load_balancer {
     target_group_arn = "${aws_lb_target_group.nats_seed_monitor_target_group.arn}" 
     container_name   = "nats_seed"
@@ -46,11 +40,6 @@ resource "aws_ecs_service" "nats_server1_service" {
   ]
   
   load_balancer {
-    target_group_arn = "${aws_lb_target_group.nats_server1_route_target_group.arn}" 
-    container_name   = "nats_server1"
-    container_port   = "${var.route_port}"
-  }
-  load_balancer {
     target_group_arn = "${aws_lb_target_group.nats_server1_client_target_group.arn}" 
     container_name   = "nats_server1"
     container_port   = "${var.client_port}"
@@ -73,17 +62,13 @@ resource "aws_ecs_service" "nats_server2_service" {
   depends_on = [
     aws_alb.nats_seed_route_lb
   ]
-  
-  load_balancer {
-    target_group_arn = "${aws_lb_target_group.nats_server2_route_target_group.arn}" 
-    container_name   = "nats_server2"
-    container_port   = "${var.route_port}"
-  }
+
   load_balancer {
     target_group_arn = "${aws_lb_target_group.nats_server2_client_target_group.arn}" 
     container_name   = "nats_server2"
     container_port   = "${var.client_port}"
   }
+
   network_configuration {
     subnets          = ["${aws_default_subnet.default_subnet_a.id}", "${aws_default_subnet.default_subnet_b.id}", "${aws_default_subnet.default_subnet_c.id}"]
     security_groups  = ["${aws_security_group.nats_route_security_group.id}","${aws_security_group.nats_client_security_group.id}"]
