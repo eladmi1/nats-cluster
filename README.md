@@ -16,12 +16,14 @@ Additional Server Docker Command
 Seed server registers to "route.314d.link" R53
 Once Seed route port is availble, Additional servers register to seed cluster using the below Docker command
 
-Additional Server Docker Command
+Additional Server Docker Command:
 ["--cluster_name", "NATS", "--cluster", "nats://0.0.0.0:6222", "--routes=nats://ruser:T0pS3cr3t@route.314d.link:6222"]
 
 Monitoring
 Seed task exposes monitoring HTTP port on "monitor.314d.link" R53
-Check status using curl -v http://monitor.314d.link:8222/routez
+
+Check status using: 
+curl -v http://monitor.314d.link:8222/routez
 
 Health Check
 Python script subscribes and publishes to each server in nested loops over 3 server URLs
